@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 * {
     margin: 0;
     padding: 0;
@@ -127,3 +128,140 @@ footer a {
     color: #fff;
     text-decoration: none;
 }
+=======
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f5f0;
+    color: #4a3f35;
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #4a3f35;
+    color: #fff;
+}
+header .logo-container {
+    display: flex;
+    align-items: center;
+}
+header .logo {
+    height: 50px;
+    margin-right: 1rem;
+}
+/* Circular logo with smaller dimensions */
+.logo-circle {
+    width: 60px; /* Adjust to desired size */
+    height: 60px; /* Matches width for a perfect circle */
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #4a3f35; /* Optional: Border for aesthetics */
+}
+
+.logo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+}
+header nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+}
+header nav ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Hero Section */
+.hero {
+    background-color: #e5d5c0;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+.hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+.hero .btn {
+    background-color: #4a3f35;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+/* Features Section */
+.features {
+    padding: 2rem;
+    background-color: #fff;
+    text-align: center;
+}
+.features h2 {
+    margin-bottom: 1rem;
+}
+.feature-grid {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+.feature {
+    flex: 1;
+    padding: 1rem;
+    background-color: #f8f5f0;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Book Catalog Section */
+.book-catalog {
+    padding: 2rem;
+    background-color: #f8f5f0;
+    text-align: center;
+}
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+.book-item img {
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background-color: #4a3f35;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+footer a {
+    color: #fff;
+    text-decoration: none;
+}
+>>>>>>> 1ca0ec4c9cc1a7a0f6552d2eb6aaad1e01e9098b
