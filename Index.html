@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book-It</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .brown-box {
+            background-color: #4a3f35;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            font-size: 1.5em;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .book-slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: max-content;
+        }
+
+        .book-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden;
+            width: 100%;
+            padding: 10px;
+        }
+
+        .book-post {
+            background-color: #e5d5c0;
+            border-radius: 10px;
+            padding: 5px;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            width: auto;
+            text-align: left;
+            height: auto;
+            display: inline-block;
+            width: 200px;
+            margin: 10px;
+        }
+
+        .book-post img {
+            width: 70px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+
+        .book-post-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-post-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .book-post-desc {
+            font-size: 10px;
+            color: #555;
+            margin-bottom: 2px;
+        }
+
+        .book-post-availability {
+            font-size: 9px;
+            color: green;
+        }
+
+        #bookPostsContainer {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .prev {
+            left: 10px;
+        }
+
+        .next {
+            right: 10px;
+        }
+
+        .book-post-link {
+            color: #4a3f35;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-circle">
+                <img src="img/BOOK - IT.png" alt="Book-It Logo">
+            </div>
+            <h1>Book-It</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="signup.html">Signup</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h2>Borrow, Lend, Connect</h2>
+            <p>Empowering the college community to share books effortlessly.</p>
+            <a href="login.html" class="btn">Get Started</a>
+        </div>
+    </section>
+
+    <div class="brown-box">
+        <h2>Browse Books</h2>
+        <button class="slider-btn prev" onclick="slide(-1)">❮</button>
+        <div class="book-container">
+            <div id="bookPostsContainer">
+            </div>
+        </div>
+        <button class="slider-btn next" onclick="slide(1)">❯</button>
+    </div>
+
+    <footer>
+        <p>© 2025 Book-It. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function displayBookPosts() {
+            const bookDataArrayString = localStorage.getItem('postedBooks');
+            const bookPostsContainer = document.getElementById('bookPostsContainer');
+            bookPostsContainer.innerHTML = '';
+
+            if (bookDataArrayString) {
+                const bookDataArray = JSON.parse(bookDataArrayString);
+
+                bookDataArray.forEach(bookData => {
+                    const bookPostLink = document.createElement('a');
+                    bookPostLink.href = `profile.html?userId=${bookData.userId}`;
+                    bookPostLink.classList.add('book-post-link');
+
+                    const bookPostDiv = document.createElement('div');
+                    bookPostDiv.classList.add('book-post');
+
+                    const imageElement = document.createElement('img');
+                    imageElement.src = bookData.image;
+                    imageElement.alt = bookData.title;
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('book-post-content');
+
+                    const titleElement = document.createElement('div');
+                    titleElement.classList.add('book-post-title');
+                    titleElement.textContent = bookData.title;
+
+                    const descElement = document.createElement('div');
+                    descElement.classList.add('book-post-desc');
+                    descElement.textContent = bookData.description;
+
+                    const availabilityElement = document.createElement('div');
+                    availabilityElement.classList.add('book-post-availability');
+                    availabilityElement.textContent = bookData.availability;
+
+                    contentDiv.appendChild(titleElement);
+                    contentDiv.appendChild(descElement);
+                    contentDiv.appendChild(availabilityElement);
+
+                    bookPostDiv.appendChild(imageElement);
+                    bookPostDiv.appendChild(contentDiv);
+                    bookPostLink.appendChild(bookPostDiv); 
+                    bookPostsContainer.appendChild(bookPostLink);
+                });
+            }
+        }
+
+        let slideIndex = 0;
+        function slide(direction) {
+          const container = document.getElementById('bookPostsContainer');
+          const bookWidth = 220;
+          const numVisible = Math.floor(container.offsetWidth / bookWidth);
+
+          slideIndex += direction;
+
+          const bookCount = container.children.length;
+          if (slideIndex < 0) {
+            slideIndex = 0;
+          }
+          if (slideIndex > bookCount - numVisible) {
+            slideIndex = Math.max(0, bookCount - numVisible);
+          }
+
+          container.style.transform = `translateX(-${slideIndex * bookWidth}px)`;
+        }
+
+        displayBookPosts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Book-It</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { background-color: #e5d5c0; display: flex; justify-content: center; }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        .profile-container {
+            width: 90%;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 60px 0 20px 0;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #4a3f35;
+            cursor: pointer;
+        }
+        .username { font-size: 28px; font-weight: bold; color: #4a3f35; }
+        .bio { color: #4a3f35; font-size: 16px; }
+        .post-container {
+            width: 95%;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 60px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 20px;
+        }
+        .post-btn, .edit-btn, .logout-btn {
+            padding: 12px 20px;
+            background: #4a3f35;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .hidden { display: none; }
+
+        .book-post {
+            background-color: #e5d5c0;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            text-align: left;
+            position: relative;
+            overflow: visible; /* Ensure dropdown isn't clipped */
+        }
+
+        .book-post img {
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .book-post-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .book-post-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .book-post-desc {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .book-post-availability {
+            font-size: 12px;
+            color: green;
+        }
+
+        #bookPostsContainer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 5px;
+            right: 5px; /* Position at the top-right */
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 120px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            right: 0; /* Align content to the right */
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+        }
+
+        .dropdown-content a:hover {background-color: #ddd;}
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: transparent;
+            color: #555;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-circle">
+                <img src="img/BOOK - IT.png" alt="Book-It Logo">
+            </div>
+            <h1>Book-It</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <img src="img/default-profile.png" alt="Profile Picture" class="profile-img" id="profilePic" onclick="document.getElementById('fileInput').click();">
+                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+                <div class="username" id="username"></div>
+                <div class="bio" id="bio"></div>
+
+                <button class="edit-btn" onclick="window.location.href='edit-profile.html'">Edit Profile</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="post-container">
+            <button class="post-btn" onclick="window.location.href='post-edit.html'">Post a Book</button>
+            <div id="bookPostsContainer">
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        async function fetchUserData(userId) {
+            // Attempt to get bio and username from local storage
+            const storedBio = localStorage.getItem("bio");
+            const storedUsername = localStorage.getItem("username");
+
+            // Apply stored values if they exist
+            if (storedUsername) {
+                document.getElementById("username").textContent = storedUsername;
+            }
+            if (storedBio) {
+                document.getElementById("bio").textContent = storedBio;
+            }
+
+            try {
+                // Fetch user data from the API
+                const response = await fetch(`http://localhost:5000/api/users/${userId}`);
+                const user = await response.json();
+
+                // Update username and bio only if not already set by local storage
+                if (!storedUsername) {
+                    document.getElementById("username").textContent = user.username;
+                }
+                if (!storedBio) {
+                    document.getElementById("bio").textContent = user.bio || "No bio available";
+                }
+
+                // Always update profile picture from the API
+                document.getElementById("profilePic").src = user.profilePic || "img/default-profile.png";
+            }
+            catch (error) {
+                console.error("Error fetching user data:", error);
+                alert("Failed to load profile data.");
+                logout();
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("profilePic", file);
+
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Not logged in!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${userId}/updateProfilePic`, {
+                    method: 'PUT',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById("profilePic").src = result.profilePicUrl;
+                    alert("Profile picture updated successfully!");
+                } else {
+                    alert("Failed to upload profile picture!");
+                }
+            } catch (err) {
+                console.error("Error uploading image:", err);
+                alert("An error occurred while uploading your profile picture.");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("username");
+            alert("Logged out successfully!");
+            window.location.href = "login.html";
+        }
+
+         function displayBookPosts(userId) {
+            const bookDataArrayString = localStorage.getItem('postedBooks');
+            const bookPostsContainer = document.getElementById('bookPostsContainer');
+            bookPostsContainer.innerHTML = '';
+
+            if (bookDataArrayString) {
+                const bookDataArray = JSON.parse(bookDataArrayString);
+
+                const userBooks = bookDataArray.filter(book => book.userId === userId);
+
+                userBooks.forEach((bookData, index) => {
+
+                    const bookPostDiv = document.createElement('div');
+                    bookPostDiv.classList.add('book-post');
+
+                    const dropdownDiv = document.createElement('div');
+                    dropdownDiv.classList.add('dropdown');
+
+                    const dropdownButton = document.createElement('button');
+                    dropdownButton.classList.add('dropbtn');
+                    dropdownButton.innerHTML = '⋮';
+
+                    const dropdownContentDiv = document.createElement('div');
+                    dropdownContentDiv.classList.add('dropdown-content');
+
+                    const editLink = document.createElement('a');
+                    editLink.href = '#';
+                    editLink.textContent = 'Edit';
+                    editLink.onclick = function(event) {
+                        event.preventDefault();
+                        editBook(index);
+                    };
+
+                    const deleteLink = document.createElement('a');
+                    deleteLink.href = '#';
+                    deleteLink.textContent = 'Delete';
+                    deleteLink.onclick = function(event) {
+                        event.preventDefault();
+                        deleteBook(index);
+                    };
+
+                    dropdownContentDiv.appendChild(editLink);
+                    dropdownContentDiv.appendChild(deleteLink);
+                    dropdownDiv.appendChild(dropdownButton);
+                    dropdownDiv.appendChild(dropdownContentDiv);
+                    bookPostDiv.appendChild(dropdownDiv);
+
+                    const imageElement = document.createElement('img');
+                    imageElement.src = bookData.image;
+                    imageElement.alt = bookData.title;
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('book-post-content');
+
+                    const titleElement = document.createElement('div');
+                    titleElement.classList.add('book-post-title');
+                    titleElement.textContent = bookData.title;
+
+                    const descElement = document.createElement('div');
+                    descElement.classList.add('book-post-desc');
+                    descElement.textContent = bookData.description;
+
+                    const availabilityElement = document.createElement('div');
+                    availabilityElement.classList.add('book-post-availability');
+                    availabilityElement.textContent = bookData.availability;
+
+                    contentDiv.appendChild(titleElement);
+                    contentDiv.appendChild(descElement);
+                    contentDiv.appendChild(availabilityElement);
+
+
+                    bookPostDiv.appendChild(imageElement);
+                    bookPostDiv.appendChild(contentDiv);
+
+
+                    bookPostsContainer.appendChild(bookPostDiv);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const urlUserId = getUrlParameter('userId');
+
+            const userIdToFetch = urlUserId || localStorage.getItem('userId');
+
+            if (userIdToFetch) {
+                fetchUserData(userIdToFetch);
+                displayBookPosts(userIdToFetch);
+            } else {
+                alert("Not logged in!");
+                window.location.href = "login.html";
+            }
+        });
+        function deleteBook(index) {
+            if (confirm("Are you sure you want to delete this book?")) {
+                let bookDataArray = JSON.parse(localStorage.getItem('postedBooks')) || [];
+                bookDataArray.splice(index, 1);
+                localStorage.setItem('postedBooks', JSON.stringify(bookDataArray));
+
+                const urlUserId = getUrlParameter('userId');
+                const userIdToFetch = urlUserId || localStorage.getItem('userId');
+                displayBookPosts(userIdToFetch);
+            }
+        }
+
+        function editBook(index) {
+            let bookDataArray = JSON.parse(localStorage.getItem('postedBooks')) || [];
+            const bookData = bookDataArray[index];
+
+            localStorage.setItem('bookToEdit', JSON.stringify(bookData));
+            localStorage.setItem('bookIndexToEdit', index);
+
+            window.location.href = 'edit-book.html';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Book-It</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #e5d5c0; }
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #4a3f35;
+        }
+        .username { font-size: 24px; font-weight: bold; color: #4a3f35; }
+        .bio { color: #4a3f35; font-size: 14px; }
+        .stats { display: flex; gap: 15px; font-size: 14px; }
+        .book-list { margin-top: 20px; }
+        .book-card {
+            display: flex;
+            background: #f8f4ef;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .book-img {
+            width: 100px;
+            height: 140px;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+        .book-title { font-size: 16px; font-weight: bold; color: #4a3f35; }
+        .book-rating { color: #f4b400; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="img/default-profile.png" alt="Profile Picture" class="profile-img" id="profilePic">
+            <div>
+                <div class="username" id="username">Loading...</div>
+                <div class="bio" id="bio">Loading bio...</div>
+                <div class="stats">
+                    <span id="followers">0 Followers</span> |
+                    <span id="following">0 Following</span> |
+                    <span id="booksCount">0 Books Lent</span>
+                </div>
+            </div>
+        </div>
+
+        <h4>Books Available</h4>
+        <div class="book-list" id="bookList">
+            <p>Loading books...</p>
+        </div>
+    </div>
+
+    <script>
+        async function fetchUserData() {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Not logged in!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5000/api/users/${userId}`);
+            const user = await response.json();
+
+            document.getElementById("username").textContent = user.username;
+            document.getElementById("bio").textContent = user.bio || "No bio available";
+            document.getElementById("profilePic").src = user.profilePic || "img/default-profile.png";
+            document.getElementById("followers").textContent = user.followers.length + " Followers";
+            document.getElementById("following").textContent = user.following.length + " Following";
+            document.getElementById("booksCount").textContent = user.books.length + " Books Lent";
+
+            const bookListDiv = document.getElementById("bookList");
+            bookListDiv.innerHTML = "";
+            user.books.forEach(book => {
+                bookListDiv.innerHTML += `
+                    <div class="book-card">
+                        <img src="${book.image}" alt="${book.title}" class="book-img">
+                        <div>
+                            <div class="book-title">${book.title}</div>
+                            <div class="book-rating">⭐ ${book.rating}/5</div>
+                            <p>${book.description}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        fetchUserData();
+    </script>
+
+</body>
+</html>

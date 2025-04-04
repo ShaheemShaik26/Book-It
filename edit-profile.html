@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Book-It</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #e5d5c0; display: flex; justify-content: center; }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        .profile-container {
+            width: 90%;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 60px 0 20px 0;
+        }
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #4a3f35;
+            cursor: pointer;
+        }
+        .input-field { margin-bottom: 15px; }
+        .save-btn {
+            padding: 12px 20px;
+            background: #4a3f35;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <img src="img/default-profile.png" alt="Profile Picture" class="profile-img" id="profilePic" onclick="document.getElementById('fileInput').click();">
+                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+                <div class="input-field">
+                    <label for="username">Username</label>
+                    <input type="text" id="usernameInput" class="form-control">
+                </div>
+                <div class="input-field">
+                    <label for="bio">Bio</label>
+                    <textarea id="bioInput" class="form-control" rows="4"></textarea>
+                </div>
+                <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchUserData() {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Not logged in!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${userId}`);
+                const user = await response.json();
+
+                document.getElementById("usernameInput").value = user.username;
+                document.getElementById("bioInput").value = user.bio || "";
+                document.getElementById("profilePic").src = user.profilePic || "img/default-profile.png";
+            } catch (err) {
+                console.error("Error fetching user data:", err);
+                alert("Failed to fetch user data. Please try again.");
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("profilePic", file);
+
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Not logged in!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${userId}/updateProfilePic`, {
+                    method: 'PUT',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const profilePicUrl = result.profilePicUrl;
+
+                    
+                    document.getElementById("profilePic").src = profilePicUrl + '?' + new Date().getTime();
+                } else {
+                    alert("Failed to upload profile picture!");
+                }
+            } catch (err) {
+                console.error("Error uploading image:", err);
+                alert("An error occurred while uploading your profile picture.");
+            }
+        }
+
+        async function saveProfile() {
+            const username = document.getElementById("usernameInput").value;
+            const bio = document.getElementById("bioInput").value;
+
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Not logged in!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, bio })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("bio", bio);  // Store the bio in localStorage
+
+                    alert("Profile updated successfully!");
+                    window.location.href = "profile.html";
+
+                } else {
+                    alert("Failed to update profile!");
+                }
+            } catch (err) {
+                console.error("Error updating profile:", err);
+                alert("An error occurred while updating your profile.");
+            }
+        }
+
+        fetchUserData();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Book - Book-It</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+         body {
+            background-color: #e5d5c0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        header {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            background-color: #4a3f35;
+            height: 60px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .post-btn {
+            padding: 12px 20px;
+            background: #4a3f35;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #4a3f35;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .post-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            width: 250px;
+            z-index: 99;
+        }
+
+        .post-box img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .post-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .post-desc {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .availability {
+            font-size: 12px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-circle">
+                <img src="img/BOOK - IT.png" alt="Book-It Logo">
+            </div>
+            <h1>Book-It</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Edit Book</h2>
+        <label for="fileInput" class="upload-btn">Upload Image</label>
+        <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="previewImage(event)">
+        <br>
+        <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 200px; display: none;">
+        <input type="text" class="input-field" placeholder="Book Title" id="bookTitle">
+        <textarea class="input-field" placeholder="Brief Description" id="bookDescription"></textarea>
+        <br>
+        <label>
+            <input type="checkbox" id="available"> Available
+        </label>
+        <label>
+            <input type="checkbox" id="not-available"> Not Available
+        </label>
+        <br>
+        <button class="post-btn" onclick="saveChanges()">Save Changes</button>
+    </div>
+
+    <script>
+        let imageData = null;
+        let bookData = JSON.parse(localStorage.getItem('bookToEdit'));
+        let bookIndex = localStorage.getItem('bookIndexToEdit');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (bookData) {
+                document.getElementById('bookTitle').value = bookData.title;
+                document.getElementById('bookDescription').value = bookData.description;
+                document.getElementById('available').checked = bookData.availability === 'Available';
+                document.getElementById('not-available').checked = bookData.availability === 'Not Available';
+                document.getElementById('imagePreview').src = bookData.image;
+                document.getElementById('imagePreview').style.display = 'block';
+                imageData = bookData.image;
+            }
+        });
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+                imageData = e.target.result;
+            }
+
+            reader.readAsDataURL(file);
+        }
+
+        function saveChanges() {
+            const title = document.getElementById('bookTitle').value;
+            const desc = document.getElementById('bookDescription').value;
+            const available = document.getElementById('available').checked;
+            const notAvailable = document.getElementById('not-available').checked;
+            const availabilityText = available ? 'Available' : 'Not Available';
+
+            if (!title || !desc || (!available && !notAvailable) || !imageData) {
+                alert('Please fill in all fields and upload an image.');
+                return;
+            }
+            let bookDataArray = JSON.parse(localStorage.getItem('postedBooks')) || [];
+            const userId = localStorage.getItem('userId');
+            const updatedBookData = {
+                title: title,
+                description: desc,
+                availability: availabilityText,
+                image: imageData,
+                userId: userId
+            };
+
+            bookDataArray[bookIndex] = updatedBookData;
+
+            localStorage.setItem('postedBooks', JSON.stringify(bookDataArray));
+
+            localStorage.removeItem('bookToEdit');
+            localStorage.removeItem('bookIndexToEdit');
+            window.location.href = 'profile.html';
+        }
+    </script>
+</body>
+</html>
